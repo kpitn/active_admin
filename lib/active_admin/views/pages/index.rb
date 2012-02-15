@@ -18,7 +18,7 @@ module ActiveAdmin
           build_scopes
 
           if collection.limit(1).exists?
-            render_index
+            config[:form] ? render_form : render_index
           else
             if params[:q]
               render_empty_results
@@ -86,13 +86,23 @@ module ActiveAdmin
           renderer_class = find_index_renderer_class(config[:as])
           paginator      = config[:paginator].nil?      ? true : config[:paginator]
           download_links = config[:download_links].nil? ? true : config[:download_links]
-          
+
           paginated_collection(collection, :entry_name     => active_admin_config.resource_name,
                                            :entries_name   => active_admin_config.plural_resource_name,
                                            :download_links => download_links,
                                            :paginator      => paginator) do
             div :class => 'index_content' do
               insert_tag(renderer_class, config, collection)
+            end
+          end
+        end
+
+        def render_form
+          param =  config[:form]
+          div :class => 'index_form' do
+            form_for(param[:object], param[:params]) do
+              render_index
+              submit_tag(I18n.t('submit_change'))
             end
           end
         end
